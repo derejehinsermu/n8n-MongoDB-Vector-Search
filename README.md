@@ -11,6 +11,10 @@ This project demonstrates how to integrate MongoDB Atlas Vector Search with n8n,
 - Queries data using n8n’s HTTP Request Node
 - Fully automated AI-powered retrieval workflow
 
+
+## Workflow
+![](MongoDB_Atlas_Vector_Search.png)
+
 ## Getting Started
 
 ### Prerequisites
