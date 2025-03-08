@@ -42,7 +42,6 @@ This project demonstrates how to integrate MongoDB Atlas Vector Search with n8n,
     pip install -r requirements.txt
     ```
 
-
 ## Usage
 
 1. **Run the Embedding API:**
