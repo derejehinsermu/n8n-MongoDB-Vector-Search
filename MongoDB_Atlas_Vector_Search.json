@@ -1,0 +1,156 @@
+{
+  "name": "MongoDB-Atlas-Vector-Search",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "aggregate",
+        "collection": "test",
+        "query": "=[{           \n        \"$vectorSearch\": {\n          \"queryVector\": [{{ $json.embedding }}],\n          \"path\": \"context_embedding\",\n          \"numCandidates\":15,\n          \"limit\": 5,\n          \"index\": \"vectorindex\"\n                \n          }\n\n            }\n            \n]"
+      },
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.1,
+      "position": [
+        500,
+        -20
+      ],
+      "id": "66e3f905-593c-465d-b957-151828c882a0",
+      "name": "MongoDB",
+      "credentials": {
+        "mongoDb": {
+          "id": "S5O3YfM36UWeOBfW",
+          "name": "test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        -20
+      ],
+      "id": "d4ecefbb-5455-4c99-926a-0cf523121bec",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "mvmlTwQCfhCHab3X",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5000/generate_embedding",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"text\":\"{{ $json.chatInput }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        -300
+      ],
+      "id": "1be54560-ce3a-4def-b59d-d76a18e3b25b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        -300
+      ],
+      "id": "45723b23-ee94-4c98-b552-a00c15302c43",
+      "name": "When chat message received",
+      "webhookId": "8917d8e2-7a89-4ae0-87ce-c7ce976a16a6"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Workflow Input Trigger').item.json.query }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant. You **must call** `MongoDB` tools to fetch answers.\"\n    - \"You **should return only the result or answer** based on the user query.\"\n\nDo not use any outside knowledge. If you don't know the answer based on the context, just say that you don't know. don't forget comparing the Original query with contenxt \"\n\n  ----------------\n    {context}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        340,
+        -300
+      ],
+      "id": "e9625b7e-70c9-490c-ad03-ee004c3bfd2b",
+      "name": "AI Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "MongoDB": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b9e3d6e1-1db7-42c7-a551-b1d5ab5d99f6",
+  "meta": {
+    "instanceId": "89cc98fef217ece731856301bfa3fe5545bf36cdc377a7b573c2b12f014b2be1"
+  },
+  "id": "TXoRoo8wyqyGNNq5",
+  "tags": []
+}
